@@ -1,23 +1,23 @@
 package com.perksls.inesai.ui.screens
 
+import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
-import androidx.compose.material.icons.filled.Sort
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -59,9 +59,7 @@ fun ProvidersScreen(
     ) { padding ->
         if (providers.isEmpty()) {
             Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding),
+                modifier = Modifier.fillMaxSize().padding(padding),
                 contentAlignment = Alignment.Center
             ) {
                 Column(
@@ -84,9 +82,7 @@ fun ProvidersScreen(
             }
         } else {
             LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding),
+                modifier = Modifier.fillMaxSize().padding(padding),
                 contentPadding = PaddingValues(16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
@@ -100,14 +96,11 @@ fun ProvidersScreen(
                         onModelSelected = { model -> viewModel.setActiveModel(provider.id, model) }
                     )
                 }
-                item {
-                    Spacer(modifier = Modifier.height(80.dp))
-                }
+                item { Spacer(modifier = Modifier.height(80.dp)) }
             }
         }
     }
 
-    // Bottom sheet: adicionar
     if (showAddSheet) {
         ProviderFormSheetPublic(
             title = "Novo Provider",
@@ -119,7 +112,6 @@ fun ProvidersScreen(
         )
     }
 
-    // Bottom sheet: editar
     editingProvider?.let { provider ->
         ProviderFormSheetPublic(
             title = "Editar Provider",
@@ -132,7 +124,6 @@ fun ProvidersScreen(
         )
     }
 
-    // Diálogo de confirmação de eliminação
     deleteTarget?.let { provider ->
         AlertDialog(
             onDismissRequest = { deleteTarget = null },
@@ -140,21 +131,12 @@ fun ProvidersScreen(
             text = { Text("\"${provider.name}\" será removido permanentemente.") },
             confirmButton = {
                 TextButton(
-                    onClick = {
-                        viewModel.deleteProvider(provider.id)
-                        deleteTarget = null
-                    },
-                    colors = ButtonDefaults.textButtonColors(
-                        contentColor = MaterialTheme.colorScheme.error
-                    )
-                ) {
-                    Text("Eliminar")
-                }
+                    onClick = { viewModel.deleteProvider(provider.id); deleteTarget = null },
+                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                ) { Text("Eliminar") }
             },
             dismissButton = {
-                TextButton(onClick = { deleteTarget = null }) {
-                    Text("Cancelar")
-                }
+                TextButton(onClick = { deleteTarget = null }) { Text("Cancelar") }
             }
         )
     }
@@ -172,29 +154,18 @@ private fun ProviderCard(
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        border = if (index == 0)
-            BorderStroke(2.dp, MaterialTheme.colorScheme.primary)
-        else null
+        border = if (index == 0) BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null
     ) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
+        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text(provider.name, style = MaterialTheme.typography.titleMedium)
                     if (index == 0) {
-                        Surface(
-                            color = MaterialTheme.colorScheme.primaryContainer,
-                            shape = MaterialTheme.shapes.small
-                        ) {
+                        Surface(color = MaterialTheme.colorScheme.primaryContainer, shape = MaterialTheme.shapes.small) {
                             Text(
                                 "Principal",
                                 style = MaterialTheme.typography.labelSmall,
@@ -209,29 +180,16 @@ private fun ProviderCard(
                         Icon(Icons.Default.Edit, contentDescription = "Editar", modifier = Modifier.size(20.dp))
                     }
                     IconButton(onClick = onDelete) {
-                        Icon(
-                            Icons.Default.Delete,
-                            contentDescription = "Eliminar",
-                            tint = MaterialTheme.colorScheme.error,
-                            modifier = Modifier.size(20.dp)
-                        )
+                        Icon(Icons.Default.Delete, contentDescription = "Eliminar", tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(20.dp))
                     }
                 }
             }
 
-            Text(
-                provider.baseUrl,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-            )
+            Text(provider.baseUrl, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
 
-            // Selector de modelo ativo
             if (provider.models.size > 1) {
                 var modelExpanded by remember { mutableStateOf(false) }
-                ExposedDropdownMenuBox(
-                    expanded = modelExpanded,
-                    onExpandedChange = { modelExpanded = it }
-                ) {
+                ExposedDropdownMenuBox(expanded = modelExpanded, onExpandedChange = { modelExpanded = it }) {
                     OutlinedTextField(
                         value = provider.effectiveModel,
                         onValueChange = {},
@@ -241,56 +199,85 @@ private fun ProviderCard(
                         modifier = Modifier.fillMaxWidth().menuAnchor(),
                         textStyle = MaterialTheme.typography.bodySmall
                     )
-                    ExposedDropdownMenu(
-                        expanded = modelExpanded,
-                        onDismissRequest = { modelExpanded = false }
-                    ) {
+                    ExposedDropdownMenu(expanded = modelExpanded, onDismissRequest = { modelExpanded = false }) {
                         provider.models.forEach { model ->
                             DropdownMenuItem(
                                 text = {
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                                    ) {
+                                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                         Text(model, style = MaterialTheme.typography.bodySmall)
                                         if (model == provider.effectiveModel) {
-                                            Icon(
-                                                Icons.Default.Check,
-                                                contentDescription = null,
-                                                tint = MaterialTheme.colorScheme.primary,
-                                                modifier = Modifier.size(16.dp)
-                                            )
+                                            Icon(Icons.Default.Check, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(16.dp))
                                         }
                                     }
                                 },
-                                onClick = {
-                                    onModelSelected(model)
-                                    modelExpanded = false
-                                }
+                                onClick = { onModelSelected(model); modelExpanded = false }
                             )
                         }
                     }
                 }
             } else {
-                Text(
-                    "Modelo: ${provider.effectiveModel}",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                )
+                Text("Modelo: ${provider.effectiveModel}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f))
             }
 
             val keyPreview = if (provider.apiKey.length > 8)
                 provider.apiKey.take(4) + "••••" + provider.apiKey.takeLast(4)
             else "••••••••"
-            Text(
-                "API Key: $keyPreview",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-            )
-
-
+            Text("API Key: $keyPreview", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
         }
     }
+}
+
+@Composable
+fun PasteableOutlinedTextField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    label: String,
+    placeholder: String = "",
+    supportingText: String? = null,
+    singleLine: Boolean = true,
+    minLines: Int = 1,
+    isPassword: Boolean = false,
+    modifier: Modifier = Modifier
+) {
+    val clipboardManager = LocalClipboardManager.current
+    val context = LocalContext.current
+    var isVisible by remember { mutableStateOf(!isPassword) }
+
+    OutlinedTextField(
+        value = value,
+        onValueChange = onValueChange,
+        label = { Text(label) },
+        placeholder = { Text(placeholder) },
+        supportingText = supportingText?.let { { Text(it) } },
+        singleLine = singleLine,
+        minLines = minLines,
+        visualTransformation = if (isPassword && !isVisible) PasswordVisualTransformation() else VisualTransformation.None,
+        trailingIcon = {
+            Row {
+                IconButton(onClick = {
+                    val clip = clipboardManager.getText()
+                    if (clip != null && clip.text.isNotBlank()) {
+                        onValueChange(clip.text)
+                        Toast.makeText(context, "✓ Colado!", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(context, "✗ Clipboard vazio", Toast.LENGTH_SHORT).show()
+                    }
+                }) {
+                    Icon(Icons.Default.ContentPaste, contentDescription = "Colar", modifier = Modifier.size(20.dp))
+                }
+                if (isPassword) {
+                    IconButton(onClick = { isVisible = !isVisible }) {
+                        Icon(
+                            if (isVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                            contentDescription = if (isVisible) "Ocultar" else "Mostrar",
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                }
+            }
+        },
+        modifier = modifier.fillMaxWidth()
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -306,9 +293,6 @@ fun ProviderFormSheetPublic(
     var apiKey by remember { mutableStateOf(initial?.apiKey ?: "") }
     var modelsText by remember { mutableStateOf(initial?.models?.joinToString(", ") ?: "") }
     var isOpenAICompatible by remember { mutableStateOf(initial?.isOpenAICompatible ?: true) }
-    var keyVisible by remember { mutableStateOf(false) }
-
-    // Sugestão de preenchimento automático
     var suggestionExpanded by remember { mutableStateOf(false) }
 
     ModalBottomSheet(
@@ -325,11 +309,7 @@ fun ProviderFormSheetPublic(
         ) {
             Text(title, style = MaterialTheme.typography.titleLarge)
 
-            // Sugestões rápidas
-            ExposedDropdownMenuBox(
-                expanded = suggestionExpanded,
-                onExpandedChange = { suggestionExpanded = it }
-            ) {
+            ExposedDropdownMenuBox(expanded = suggestionExpanded, onExpandedChange = { suggestionExpanded = it }) {
                 OutlinedTextField(
                     value = "Preencher a partir de sugestão…",
                     onValueChange = {},
@@ -341,26 +321,20 @@ fun ProviderFormSheetPublic(
                         unfocusedTextColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
                     )
                 )
-                ExposedDropdownMenu(
-                    expanded = suggestionExpanded,
-                    onDismissRequest = { suggestionExpanded = false }
-                ) {
+                ExposedDropdownMenu(expanded = suggestionExpanded, onDismissRequest = { suggestionExpanded = false }) {
                     ProvidersConfig.SUGGESTIONS.forEach { suggestion ->
                         DropdownMenuItem(
                             text = {
                                 Column {
                                     Text(suggestion.name, style = MaterialTheme.typography.bodyMedium)
-                                    Text(
-                                        suggestion.baseUrl,
-                                        style = MaterialTheme.typography.labelSmall,
-                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-                                    )
+                                    Text(suggestion.baseUrl, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
                                 }
                             },
                             onClick = {
                                 name = suggestion.name
                                 baseUrl = suggestion.baseUrl
                                 modelsText = suggestion.models.joinToString(", ")
+                                isOpenAICompatible = suggestion.isOpenAICompatible
                                 suggestionExpanded = false
                             }
                         )
@@ -370,26 +344,13 @@ fun ProviderFormSheetPublic(
 
             HorizontalDivider()
 
-            OutlinedTextField(
-                value = name,
-                onValueChange = { name = it },
-                label = { Text("Nome *") },
-                placeholder = { Text("ex: Meu OpenAI") },
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth()
-            )
+            PasteableOutlinedTextField(value = name, onValueChange = { name = it }, label = "Nome *", placeholder = "ex: Meu OpenAI")
 
-            // Toggle OpenAI Compatible
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
+            Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text("Compatível com OpenAI", style = MaterialTheme.typography.bodyMedium)
                     Text(
-                        if (isOpenAICompatible) "URL base + /chat/completions automático"
-                        else "Introduz o endpoint completo",
+                        if (isOpenAICompatible) "URL base + /chat/completions automático" else "Introduz o endpoint completo",
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
                     )
@@ -397,77 +358,35 @@ fun ProviderFormSheetPublic(
                 Switch(checked = isOpenAICompatible, onCheckedChange = { isOpenAICompatible = it })
             }
 
-            OutlinedTextField(
+            PasteableOutlinedTextField(
                 value = baseUrl,
                 onValueChange = { baseUrl = it },
-                label = { Text(if (isOpenAICompatible) "Base URL *" else "Endpoint completo *") },
-                placeholder = { Text(if (isOpenAICompatible) "https://api.openai.com/v1" else "https://api.openai.com/v1/chat/completions") },
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth()
+                label = if (isOpenAICompatible) "Base URL *" else "Endpoint completo *",
+                placeholder = if (isOpenAICompatible) "https://api.openai.com/v1" else "https://api.openai.com/v1/chat/completions"
             )
 
-            val clipboardManager = LocalClipboardManager.current
-            OutlinedTextField(
-                value = apiKey,
-                onValueChange = { apiKey = it },
-                label = { Text("API Key *") },
-                placeholder = { Text("sk-…") },
-                singleLine = true,
-                visualTransformation = if (keyVisible)
-                    VisualTransformation.None
-                else
-                    PasswordVisualTransformation(),
-                trailingIcon = {
-                    Row {
-                        // Botão Colar
-                        IconButton(onClick = {
-                            clipboardManager.getText()?.text?.let { apiKey = it }
-                        }) {
-                            Icon(
-                                Icons.Default.ContentPaste,
-                                contentDescription = "Colar",
-                                modifier = Modifier.size(20.dp)
-                            )
-                        }
-                        IconButton(onClick = { keyVisible = !keyVisible }) {
-                            Icon(
-                                if (keyVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
-                                contentDescription = if (keyVisible) "Ocultar" else "Mostrar"
-                            )
-                        }
-                    }
-                },
-                modifier = Modifier.fillMaxWidth()
-            )
+            PasteableOutlinedTextField(value = apiKey, onValueChange = { apiKey = it }, label = "API Key *", placeholder = "sk-…", isPassword = true)
 
-            OutlinedTextField(
+            PasteableOutlinedTextField(
                 value = modelsText,
                 onValueChange = { modelsText = it },
-                label = { Text("Modelos *") },
-                placeholder = { Text("gpt-4o, gpt-4o-mini, gpt-3.5-turbo") },
-                supportingText = { Text("Separados por vírgula") },
-                minLines = 2,
-                modifier = Modifier.fillMaxWidth()
+                label = "Modelos *",
+                placeholder = "gpt-4o, gpt-4o-mini",
+                supportingText = "Separados por vírgula",
+                singleLine = false,
+                minLines = 2
             )
 
             val models = modelsText.split(",").map { it.trim() }.filter { it.isNotBlank() }
-            val isValid = name.isNotBlank() && baseUrl.isNotBlank() &&
-                    apiKey.isNotBlank() && models.isNotEmpty()
+            val isValid = name.isNotBlank() && baseUrl.isNotBlank() && apiKey.isNotBlank() && models.isNotEmpty()
 
             Button(
                 onClick = { onSave(name.trim(), baseUrl.trim(), apiKey.trim(), models, isOpenAICompatible) },
                 enabled = isValid,
                 modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Guardar")
-            }
+            ) { Text("Guardar") }
 
-            TextButton(
-                onClick = onDismiss,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Cancelar")
-            }
+            TextButton(onClick = onDismiss, modifier = Modifier.fillMaxWidth()) { Text("Cancelar") }
         }
     }
 }

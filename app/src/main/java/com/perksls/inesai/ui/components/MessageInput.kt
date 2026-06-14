@@ -1,30 +1,17 @@
 package com.perksls.inesai.ui.components
 
 import android.graphics.Bitmap
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AttachFile
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Image
-import androidx.compose.material.icons.filled.Send
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 
 @Composable
 fun MessageInput(
@@ -35,187 +22,147 @@ fun MessageInput(
     onClearImage: () -> Unit,
     attachedFileName: String?,
     onClearFile: () -> Unit,
-    isLoading: Boolean,
-    modifier: Modifier = Modifier
+    isLoading: Boolean
 ) {
-    var text by remember { mutableStateOf("") }
+    var message by remember { mutableStateOf("") }
+    var showAttachMenu by remember { mutableStateOf(false) }
 
-    Surface(
-        tonalElevation = 2.dp,
-        modifier = modifier.fillMaxWidth()
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .imePadding()
+            .padding(horizontal = 12.dp, vertical = 8.dp),
+        shape = RoundedCornerShape(28.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
+        )
     ) {
-        Column {
-            // Preview imagem
-            AnimatedVisibility(
-                visible = selectedImage != null,
-                enter = expandVertically(),
-                exit = shrinkVertically()
-            ) {
-                Box(
+        Column(modifier = Modifier.padding(12.dp)) {
+
+            // Chips de anexos activos
+            if (selectedImage != null || attachedFileName != null) {
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                        .padding(bottom = 8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    selectedImage?.let { bitmap ->
-                        Box(
-                            modifier = Modifier
-                                .size(80.dp)
-                                .clip(RoundedCornerShape(8.dp))
-                        ) {
-                            Image(
-                                bitmap = bitmap.asImageBitmap(),
-                                contentDescription = "Imagem selecionada",
-                                modifier = Modifier.fillMaxSize(),
-                                contentScale = ContentScale.Crop
-                            )
-                            IconButton(
-                                onClick = onClearImage,
-                                modifier = Modifier
-                                    .size(24.dp)
-                                    .align(Alignment.TopEnd)
-                                    .background(
-                                        MaterialTheme.colorScheme.error.copy(alpha = 0.8f),
-                                        CircleShape
-                                    )
+                    if (selectedImage != null) {
+                        Surface(shape = RoundedCornerShape(16.dp), color = MaterialTheme.colorScheme.primaryContainer) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(4.dp)
                             ) {
-                                Icon(
-                                    Icons.Default.Close,
-                                    contentDescription = "Remover imagem",
-                                    tint = MaterialTheme.colorScheme.onError,
-                                    modifier = Modifier.size(16.dp)
-                                )
+                                Text("📷 Imagem", style = MaterialTheme.typography.labelSmall)
+                                IconButton(onClick = onClearImage, modifier = Modifier.size(20.dp)) {
+                                    Icon(Icons.Default.Close, contentDescription = "Remover", modifier = Modifier.size(14.dp))
+                                }
                             }
                         }
                     }
-                }
-            }
-
-            // Preview ficheiro
-            AnimatedVisibility(
-                visible = attachedFileName != null,
-                enter = expandVertically(),
-                exit = shrinkVertically()
-            ) {
-                attachedFileName?.let { name ->
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 4.dp)
-                            .background(
-                                MaterialTheme.colorScheme.surfaceVariant,
-                                RoundedCornerShape(8.dp)
-                            )
-                            .padding(horizontal = 12.dp, vertical = 6.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            modifier = Modifier.weight(1f)
-                        ) {
-                            Icon(
-                                Icons.Default.AttachFile,
-                                contentDescription = null,
-                                modifier = Modifier.size(16.dp),
-                                tint = MaterialTheme.colorScheme.primary
-                            )
-                            Text(
-                                name,
-                                style = MaterialTheme.typography.bodySmall,
-                                maxLines = 1
-                            )
-                        }
-                        IconButton(
-                            onClick = onClearFile,
-                            modifier = Modifier.size(24.dp)
-                        ) {
-                            Icon(
-                                Icons.Default.Close,
-                                contentDescription = "Remover ficheiro",
-                                modifier = Modifier.size(16.dp)
-                            )
+                    if (attachedFileName != null) {
+                        Surface(shape = RoundedCornerShape(16.dp), color = MaterialTheme.colorScheme.primaryContainer) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                Text("📄 $attachedFileName", style = MaterialTheme.typography.labelSmall)
+                                IconButton(onClick = onClearFile, modifier = Modifier.size(20.dp)) {
+                                    Icon(Icons.Default.Close, contentDescription = "Remover", modifier = Modifier.size(14.dp))
+                                }
+                            }
                         }
                     }
                 }
             }
 
             Row(
-                modifier = Modifier
-                    .padding(horizontal = 8.dp, vertical = 8.dp)
-                    .navigationBarsPadding()
-                    .fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.Bottom,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                IconButton(onClick = onImagePick, enabled = !isLoading) {
-                    Icon(
-                        imageVector = Icons.Default.Image,
-                        contentDescription = "Anexar imagem",
-                        tint = if (selectedImage != null)
-                            MaterialTheme.colorScheme.primary
-                        else
-                            MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                // Botão único de anexo com dropdown
+                Box {
+                    IconButton(
+                        onClick = { showAttachMenu = true },
+                        enabled = !isLoading,
+                        modifier = Modifier.size(36.dp)
+                    ) {
+                        Icon(
+                            Icons.Default.AttachFile,
+                            contentDescription = "Anexar",
+                            modifier = Modifier.size(20.dp),
+                            tint = if (selectedImage != null || attachedFileName != null)
+                                MaterialTheme.colorScheme.primary
+                            else
+                                MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    DropdownMenu(
+                        expanded = showAttachMenu,
+                        onDismissRequest = { showAttachMenu = false }
+                    ) {
+                        DropdownMenuItem(
+                            text = { Text("📷  Imagem") },
+                            onClick = {
+                                showAttachMenu = false
+                                onImagePick()
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("📄  Ficheiro (txt, pdf, zip…)") },
+                            onClick = {
+                                showAttachMenu = false
+                                onFilePick()
+                            }
+                        )
+                    }
                 }
 
-                IconButton(onClick = onFilePick, enabled = !isLoading) {
-                    Icon(
-                        imageVector = Icons.Default.AttachFile,
-                        contentDescription = "Anexar ficheiro",
-                        tint = if (attachedFileName != null)
-                            MaterialTheme.colorScheme.primary
-                        else
-                            MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-
+                // Campo de texto
                 OutlinedTextField(
-                    value = text,
-                    onValueChange = { text = it },
-                    placeholder = {
-                        Text(when {
-                            selectedImage != null -> "Descreve a imagem..."
-                            attachedFileName != null -> "Pergunta sobre o ficheiro..."
-                            else -> "Mensagem..."
-                        })
-                    },
+                    value = message,
+                    onValueChange = { message = it },
+                    placeholder = { Text("Mensagem...", fontSize = 14.sp) },
                     modifier = Modifier
                         .weight(1f)
-                        .padding(horizontal = 4.dp),
-                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send),
-                    keyboardActions = KeyboardActions(
-                        onSend = {
-                            if (text.isNotBlank() && !isLoading) {
-                                onSendMessage(text.trim())
-                                text = ""
-                            }
-                        }
-                    ),
+                        .clip(RoundedCornerShape(24.dp)),
+                    shape = RoundedCornerShape(24.dp),
+                    minLines = 1,
                     maxLines = 5,
+                    enabled = !isLoading,
                     colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = MaterialTheme.colorScheme.primary,
+                        unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.4f),
                         focusedContainerColor = MaterialTheme.colorScheme.surface,
                         unfocusedContainerColor = MaterialTheme.colorScheme.surface
                     )
                 )
 
-                IconButton(
+                // Botão enviar
+                val canSend = (message.isNotBlank() || selectedImage != null || attachedFileName != null) && !isLoading
+                FloatingActionButton(
                     onClick = {
-                        if ((text.isNotBlank() || attachedFileName != null) && !isLoading) {
-                            onSendMessage(text.trim())
-                            text = ""
+                        if (canSend) {
+                            onSendMessage(message)
+                            message = ""
                         }
                     },
-                    enabled = (text.isNotBlank() || attachedFileName != null) && !isLoading
+                    modifier = Modifier.size(48.dp),
+                    shape = RoundedCornerShape(24.dp),
+                    containerColor = if (canSend) MaterialTheme.colorScheme.primary
+                                     else MaterialTheme.colorScheme.surfaceVariant
                 ) {
-                    if (isLoading) {
-                        CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
-                    } else {
-                        Icon(
-                            imageVector = Icons.Default.Send,
-                            contentDescription = "Enviar",
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                    }
+                    Icon(
+                        if (isLoading) Icons.Default.HourglassEmpty else Icons.Default.Send,
+                        contentDescription = "Enviar",
+                        modifier = Modifier.size(20.dp),
+                        tint = if (canSend) MaterialTheme.colorScheme.onPrimary
+                               else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
+                    )
                 }
             }
         }

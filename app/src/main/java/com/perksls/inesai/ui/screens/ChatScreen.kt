@@ -128,7 +128,6 @@ fun ChatScreen(
         }
     ) {
         Scaffold(
-            contentWindowInsets = WindowInsets(0),
             topBar = {
                 TopAppBar(
                     title = {
@@ -194,7 +193,6 @@ fun ChatScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(padding)
-                    .imePadding()
             ) {
                 // Área de mensagens — ocupa todo o espaço restante
                 Box(modifier = Modifier.weight(1f)) {
