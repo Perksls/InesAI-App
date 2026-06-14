@@ -242,7 +242,7 @@ class ChatViewModel(
                     role = MessageRole.ASSISTANT,
                     content = "",
                     isStreaming = true,
-                    model = primaryModel
+                    model = "${primaryProvider.name} • $primaryModel"
                 )
                 _messages.add(assistantMessage)
 
@@ -264,13 +264,19 @@ class ChatViewModel(
                         is FallbackStreamEvent.SuccessProvider -> {
                             _providerStatus.value = _providerStatus.value + (event.providerName to "✅ Ativo")
                             _currentProviderName.value = event.providerName
+                            // Actualizar label da mensagem com o provider que respondeu
+                            val i = _messages.lastIndex
+                            if (i >= 0 && _messages[i].role == MessageRole.ASSISTANT) {
+                                val currentModel = _messages[i].model?.substringAfter(" • ") ?: primaryModel
+                                _messages[i] = _messages[i].copy(model = "${event.providerName} • $currentModel")
+                            }
                         }
                         is FallbackStreamEvent.ContentChunk -> {
                             val i = _messages.lastIndex
                             _messages[i] = _messages[i].copy(
                                 content = _messages[i].content + event.content,
                                 isStreaming = true,
-                                model = _currentProviderName.value
+                                model = _messages[i].model // manter o label já definido
                             )
                         }
                         is FallbackStreamEvent.Finished -> {

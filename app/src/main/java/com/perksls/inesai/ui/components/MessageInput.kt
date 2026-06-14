@@ -30,6 +30,7 @@ fun MessageInput(
     Card(
         modifier = Modifier
             .fillMaxWidth()
+            .navigationBarsPadding()
             .imePadding()
             .padding(horizontal = 12.dp, vertical = 8.dp),
         shape = RoundedCornerShape(28.dp),
